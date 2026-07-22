@@ -27,6 +27,16 @@
     gap:10px;
     justify-content:flex-end;
     flex-wrap:wrap;
+    align-items:center;
+  }
+  .toolbar input#fileName{
+    flex:1;
+    min-width:220px;
+    padding:9px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    font-family:inherit;
+    font-size:14px;
   }
   button{
     font-family:inherit;
@@ -207,9 +217,19 @@
   .settings .grid2{ margin-top:14px; margin-bottom:0; }
 
   @media print{
-    body{ background:#fff; padding:0; }
+    html, body{ background:#fff; padding:0; height:auto !important; overflow:visible !important; }
     .toolbar, .settings, .addRowWrap, .removeCell, .discount-row{ display:none !important; }
-    .sheet{ border:none; padding:0; }
+    .sheet{ border:none; padding:0; max-width:none; overflow:visible !important; }
+    /* بعض المتصفحات (خصوصًا على الجوال) لا تعرض عناصر flex/grid بشكل صحيح عند الطباعة أو الحفظ كـ PDF،
+       فنحوّلها هنا لعناصر أبسط لضمان ظهور المحتوى بدل صفحة فارغة */
+    .head{ display:block !important; overflow:hidden; }
+    .head > div:first-child{ float:right; }
+    .head .meta{ float:left; text-align:left; }
+    .grid2{ display:block !important; }
+    .grid2 .field{ display:block; width:100%; margin-bottom:12px; }
+    .clientRow{ display:block !important; }
+    .clientRow input{ display:inline-block; width:65%; }
+    .honorific{ display:inline-block; margin-right:8px; }
   }
   @media (max-width:640px){
     .grid2{ grid-template-columns:1fr; }
@@ -221,8 +241,9 @@
 <body>
 
   <div class="toolbar">
+    <input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
     <button class="ghost" id="resetBtn">تصفير | Reset</button>
-    <button class="primary" id="printBtn">طباعة / حفظ PDF | Print / Save PDF</button>
+    <button class="primary" id="printBtn">مشاركة | Share</button>
   </div>
 
   <div class="sheet">
@@ -398,9 +419,18 @@
 
   document.getElementById('quoteDate').valueAsDate = new Date();
 
-  document.getElementById('printBtn').addEventListener('click', () => window.print());
+  const defaultTitle = document.title;
+  document.getElementById('printBtn').addEventListener('click', () => {
+    const fileName = document.getElementById('fileName').value.trim();
+    document.title = fileName ? fileName : defaultTitle;
+    window.print();
+  });
+  window.addEventListener('afterprint', () => {
+    document.title = defaultTitle;
+  });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('fileName').value = '';
     document.getElementById('clientName').value = '';
     document.getElementById('clientCity').value = '';
     document.getElementById('discount').value = '0';
