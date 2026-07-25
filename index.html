@@ -294,13 +294,86 @@ tbody td{ padding:10px 6px; font-size:13px; }
 .discount-row{ gap:14px; }
 .discount-row .field{ min-width:130px; }
 }
+
+/* ===== Login Gate ===== */
+#loginGate{
+position:fixed;
+inset:0;
+background:linear-gradient(160deg,var(--brand) 0%,var(--brand-dark) 100%);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+z-index:9999;
+}
+#loginGate .loginCard{
+background:#fff;
+border-radius:14px;
+padding:36px 32px;
+width:100%;
+max-width:380px;
+box-shadow:0 20px 50px rgba(0,0,0,.25);
+text-align:center;
+}
+#loginGate .loginCard img{ max-height:70px; margin-bottom:14px; }
+#loginGate h2{ margin:0 0 22px; color:var(--brand); font-size:19px; }
+#loginGate .field{ text-align:right; margin-bottom:14px; }
+#loginGate .field label{ display:block; font-size:13px; color:#555; margin-bottom:5px; }
+#loginGate .field input{
+width:100%;
+padding:10px 12px;
+border:1px solid var(--line);
+border-radius:8px;
+font-family:inherit;
+font-size:14px;
+}
+#loginGate .loginBtn{
+width:100%;
+margin-top:6px;
+background:var(--brand);
+color:#fff;
+border-color:var(--brand);
+padding:11px;
+font-weight:600;
+font-size:15px;
+}
+#loginGate .loginError{
+color:#b23b3b;
+font-size:13px;
+margin-top:12px;
+min-height:16px;
+}
+#appContent{ display:none; }
+.logoutBtn{ background:#fff; color:var(--brand); border-color:var(--brand); }
 </style>
 </head>
 <body>
 
+<div id="loginGate">
+<div class="loginCard">
+<img src="logo.png" alt="مطعم كرزة" onerror="this.style.display='none'">
+<h2>تسجيل الدخول | Login</h2>
+<form id="loginForm">
+<div class="field">
+<label>البريد الإلكتروني | Email</label>
+<input type="email" id="loginEmail" autocomplete="username" required>
+</div>
+<div class="field">
+<label>كلمة السر | Password</label>
+<input type="password" id="loginPassword" autocomplete="current-password" required>
+</div>
+<button type="submit" class="loginBtn">دخول | Login</button>
+<div class="loginError" id="loginError"></div>
+</form>
+</div>
+</div>
+
+<div id="appContent">
+
 <div class="toolbar">
 <div class="toolbar-buttons">
 <button class="ghost" id="resetBtn">تصفير | Reset</button>
+<button class="ghost logoutBtn" id="logoutBtn">خروج | Logout</button>
 <button class="primary" id="printBtn">مشاركة | Share</button>
 </div>
 <input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
@@ -407,8 +480,59 @@ SA5665000000101483617015
 
 </div>
 
+</div>
+
 <script>
 (function(){
+// ===== Login Gate =====
+// قائمة الحسابات المسموح لها بالدخول (يحددها الإدمن فقط - لا يوجد إنشاء حساب جديد)
+const ALLOWED_USERS = [
+{ email: 'alhassan.karaza@kuzama.co', password: 'Kk1234567@' },
+{ email: 'malik.khaleel@kuzama.co', password: 'Aa727451@' }
+];
+const SESSION_KEY = 'kz_pq_session_email';
+
+const loginGate = document.getElementById('loginGate');
+const appContent = document.getElementById('appContent');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+
+function showApp(){
+loginGate.style.display = 'none';
+appContent.style.display = 'block';
+}
+function showGate(){
+appContent.style.display = 'none';
+loginGate.style.display = 'flex';
+}
+
+const savedEmail = localStorage.getItem(SESSION_KEY);
+if(savedEmail && ALLOWED_USERS.some(u => u.email === savedEmail)){
+showApp();
+} else {
+showGate();
+}
+
+loginForm.addEventListener('submit', (e) => {
+e.preventDefault();
+const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+const password = document.getElementById('loginPassword').value;
+const match = ALLOWED_USERS.find(u => u.email === email && u.password === password);
+if(match){
+localStorage.setItem(SESSION_KEY, match.email);
+loginError.textContent = '';
+loginForm.reset();
+showApp();
+} else {
+loginError.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة | Incorrect email or password';
+}
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+localStorage.removeItem(SESSION_KEY);
+showGate();
+});
+
 const itemsBody = document.getElementById('itemsBody');
 
 function num(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
