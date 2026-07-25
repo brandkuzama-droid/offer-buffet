@@ -5,443 +5,461 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>عرض سعر | Price Quote</title>
 <style>
-  :root{
-    --brand:#7a1f2b;
-    --brand-dark:#5c1620;
-    --bg:#f5f2f0;
-    --line:#d8cfc9;
-    --text:#2b2320;
-  }
-  *{box-sizing:border-box;}
-  body{
-    font-family:"Tahoma","Segoe UI",Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    margin:0;
-    padding:24px;
-  }
-  .toolbar{
-    max-width:900px;
-    margin:0 auto 16px;
-    display:flex;
-    gap:10px;
-    justify-content:flex-end;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-  .toolbar input#fileName{
-    flex:1;
-    min-width:220px;
-    padding:9px 12px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    font-family:inherit;
-    font-size:14px;
-  }
-  button{
-    font-family:inherit;
-    font-size:14px;
-    padding:9px 16px;
-    border-radius:8px;
-    border:1px solid var(--line);
-    background:#fff;
-    cursor:pointer;
-  }
-  button.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
-  button.ghost{ background:#fff; color:var(--text); }
-  button:hover{ opacity:.9; }
+:root{
+--brand:#7a1f2b;
+--brand-dark:#5c1620;
+--bg:#f5f2f0;
+--line:#d8cfc9;
+--text:#2b2320;
+}
+*{box-sizing:border-box;}
+body{
+font-family:"Tahoma","Segoe UI",Arial,sans-serif;
+background:var(--bg);
+color:var(--text);
+margin:0;
+padding:24px;
+}
+.toolbar{
+max-width:900px;
+margin:0 auto 16px;
+display:flex;
+gap:10px;
+justify-content:flex-end;
+flex-wrap:wrap;
+align-items:center;
+}
+.toolbar input#fileName{
+flex:1;
+min-width:220px;
+padding:9px 12px;
+border-radius:8px;
+border:1px solid var(--line);
+font-family:inherit;
+font-size:14px;
+}
+button{
+font-family:inherit;
+font-size:14px;
+padding:9px 16px;
+border-radius:8px;
+border:1px solid var(--line);
+background:#fff;
+cursor:pointer;
+}
+button.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+button.ghost{ background:#fff; color:var(--text); }
+button:hover{ opacity:.9; }
 
-  .sheet{
-    max-width:900px;
-    margin:0 auto;
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:48px 56px;
-  }
-  .head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    border-bottom:2px solid var(--brand);
-    padding-bottom:24px;
-    margin-bottom:36px;
-  }
-  .head img{ max-height:70px; }
-  .head .meta{ text-align:left; font-size:13px; }
-  .head .meta label{ display:block; margin-bottom:6px; color:#666; }
-  .head .meta input[type=date]{ border:1px solid var(--line); border-radius:6px; padding:5px 8px; font-family:inherit; }
-  .cr{ font-size:12px; color:#777; margin-top:4px; }
-  .restaurantName{ font-size:15px; font-weight:700; color:var(--brand); margin-top:8px; }
+.sheet{
+max-width:900px;
+margin:0 auto;
+background:#fff;
+border:1px solid var(--line);
+border-radius:10px;
+padding:48px 56px;
+}
+.head{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+border-bottom:2px solid var(--brand);
+padding-bottom:24px;
+margin-bottom:36px;
+}
+.head img{ max-height:70px; }
+.head .meta{ text-align:left; font-size:13px; }
+.head .meta label{ display:block; margin-bottom:6px; color:#666; }
+.head .meta input[type=date]{ border:1px solid var(--line); border-radius:6px; padding:5px 8px; font-family:inherit; }
+.cr{ font-size:12px; color:#777; margin-top:4px; }
+.restaurantName{ font-size:15px; font-weight:700; color:var(--brand); margin-top:8px; }
 
-  h1.title{
-    text-align:center;
-    color:var(--brand);
-    font-size:26px;
-    margin:16px 0 40px;
-    letter-spacing:.5px;
-  }
+h1.title{
+text-align:center;
+color:var(--brand);
+font-size:26px;
+margin:16px 0 40px;
+letter-spacing:.5px;
+}
 
-  .grid2{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:24px;
-    margin-bottom:36px;
-  }
-  .field label{ display:block; font-size:13px; color:#555; margin-bottom:5px; }
-  .field input, .field select{
-    width:100%;
-    padding:9px 10px;
-    border:1px solid var(--line);
-    border-radius:7px;
-    font-family:inherit;
-    font-size:14px;
-  }
-  .clientRow{
-    display:flex;
-    align-items:center;
-    gap:10px;
-  }
-  .clientRow input{ flex:1; }
-  .honorific{
-    white-space:nowrap;
-    font-size:13px;
-    color:var(--brand);
-    font-weight:600;
-  }
-  #vat[readonly]{ background:#f4f1ef; color:#555; text-align:center; }
+.grid2{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:24px;
+margin-bottom:36px;
+}
+.field label{ display:block; font-size:13px; color:#555; margin-bottom:5px; }
+.field input, .field select{
+width:100%;
+padding:9px 10px;
+border:1px solid var(--line);
+border-radius:7px;
+font-family:inherit;
+font-size:14px;
+}
+.clientRow{
+display:flex;
+align-items:center;
+gap:10px;
+}
+.clientRow input{ flex:1; }
+.honorific{
+white-space:nowrap;
+font-size:13px;
+color:var(--brand);
+font-weight:600;
+}
+#vat[readonly]{ background:#f4f1ef; color:#555; text-align:center; }
 
-  .notice{
-    background:#faf3e8;
-    border:1px solid #e8d9b8;
-    border-radius:8px;
-    padding:16px 20px;
-    font-size:13px;
-    color:#6b5a30;
-    line-height:2;
-    margin:12px 0 28px;
-    text-align:center;
-  }
+.notice{
+background:#faf3e8;
+border:1px solid #e8d9b8;
+border-radius:8px;
+padding:16px 20px;
+font-size:13px;
+color:#6b5a30;
+line-height:2;
+margin:12px 0 28px;
+text-align:center;
+}
 
-  table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:18px;
-    font-size:14px;
-  }
-  thead th{
-    background:var(--brand);
-    color:#fff;
-    padding:14px 10px;
-    font-weight:600;
-    font-size:13px;
-  }
-  tbody td{
-    border:1px solid var(--line);
-    padding:14px 10px;
-    text-align:center;
-    vertical-align:middle;
-  }
-  tbody td.label{ text-align:right; font-weight:600; }
-  tbody input, tbody select{
-    width:100%;
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:6px;
-    text-align:center;
-    font-family:inherit;
-  }
-  tbody td.label input.itemLabel{
-    text-align:right;
-    font-weight:600;
-    border:1px solid transparent;
-    background:transparent;
-  }
-  tbody td.label input.itemLabel:focus{
-    border:1px solid var(--line);
-    background:#fff;
-  }
-  tbody tr.summary td{ background:#faf7f5; font-weight:700; }
-  tbody tr.total td{ background:var(--brand); color:#fff; font-weight:700; font-size:15px; }
+.table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin-top:18px; }
 
-  .removeCell{ width:36px; }
-  td.removeCell{ padding:4px !important; }
-  .removeRowBtn{
-    border:none;
-    background:transparent;
-    color:#b23b3b;
-    font-size:16px;
-    line-height:1;
-    cursor:pointer;
-    padding:4px 6px;
-  }
-  .removeRowBtn:hover{ color:#7a1f2b; }
-  .addRowWrap{ margin:16px 0 32px; text-align:center; }
-  .addRowBtn{
-    background:#fff;
-    border:1px dashed var(--brand);
-    color:var(--brand);
-    font-weight:600;
-  }
+table{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+.table-scroll table{ margin-top:0; }
+thead th{
+background:var(--brand);
+color:#fff;
+padding:14px 10px;
+font-weight:600;
+font-size:13px;
+white-space:nowrap;
+}
+tbody td{
+border:1px solid var(--line);
+padding:14px 10px;
+text-align:center;
+vertical-align:middle;
+}
+tbody td.label{ text-align:right; font-weight:600; }
+tbody input, tbody select{
+width:100%;
+border:1px solid var(--line);
+border-radius:6px;
+padding:6px;
+text-align:center;
+font-family:inherit;
+}
+tbody td.label input.itemLabel{
+text-align:right;
+font-weight:600;
+border:1px solid transparent;
+background:transparent;
+}
+tbody td.label input.itemLabel:focus{
+border:1px solid var(--line);
+background:#fff;
+}
+tbody tr.summary td{ background:#faf7f5; font-weight:700; }
+tbody tr.total td{ background:var(--brand); color:#fff; font-weight:700; font-size:15px; }
 
-  .discount-row{
-    display:flex;
-    gap:24px;
-    margin:28px 0;
-    flex-wrap:wrap;
-  }
-  .discount-row .field{ flex:1; min-width:160px; }
+.removeCell{ width:36px; }
+td.removeCell{ padding:4px !important; }
+.removeRowBtn{
+border:none;
+background:transparent;
+color:#b23b3b;
+font-size:16px;
+line-height:1;
+cursor:pointer;
+padding:4px 6px;
+}
+.removeRowBtn:hover{ color:#7a1f2b; }
+.addRowWrap{ margin:16px 0 32px; text-align:center; }
+.addRowBtn{
+background:#fff;
+border:1px dashed var(--brand);
+color:var(--brand);
+font-weight:600;
+}
 
-  .footer{
-    margin-top:44px;
-    padding-top:24px;
-    border-top:1px solid var(--line);
-    font-size:13px;
-    color:#444;
-    line-height:2.2;
-  }
-  .footer strong{ color:var(--brand); }
+.discount-row{
+display:flex;
+gap:24px;
+margin:28px 0;
+flex-wrap:wrap;
+}
+.discount-row .field{ flex:1; min-width:160px; }
 
-  .settings{
-    margin-top:24px;
-    border:1px dashed var(--line);
-    border-radius:8px;
-    padding:14px;
-  }
-  .settings summary{
-    cursor:pointer;
-    font-weight:600;
-    color:var(--brand);
-    font-size:14px;
-  }
-  .settings .grid2{ margin-top:14px; margin-bottom:0; }
+.footer{
+margin-top:44px;
+padding-top:24px;
+border-top:1px solid var(--line);
+font-size:13px;
+color:#444;
+line-height:2.2;
+}
+.footer strong{ color:var(--brand); }
 
-  @media print{
-    html, body{ background:#fff; padding:0; height:auto !important; overflow:visible !important; }
-    .toolbar, .settings, .addRowWrap, .removeCell, .discount-row{ display:none !important; }
-    .sheet{ border:none; padding:0; max-width:none; overflow:visible !important; }
-    /* بعض المتصفحات (خصوصًا على الجوال) لا تعرض عناصر flex/grid بشكل صحيح عند الطباعة أو الحفظ كـ PDF،
-       فنحوّلها هنا لعناصر أبسط لضمان ظهور المحتوى بدل صفحة فارغة */
-    .head{ display:block !important; overflow:hidden; }
-    .head > div:first-child{ float:right; }
-    .head .meta{ float:left; text-align:left; }
-    .grid2{ display:block !important; }
-    .grid2 .field{ display:block; width:100%; margin-bottom:12px; }
-    .clientRow{ display:block !important; }
-    .clientRow input{ display:inline-block; width:65%; }
-    .honorific{ display:inline-block; margin-right:8px; }
-  }
-  @media (max-width:640px){
-    .grid2{ grid-template-columns:1fr; }
-    .head{ flex-direction:column; gap:12px; }
-    .head .meta{ text-align:right; }
-  }
+.settings{
+margin-top:24px;
+border:1px dashed var(--line);
+border-radius:8px;
+padding:14px;
+}
+.settings summary{
+cursor:pointer;
+font-weight:600;
+color:var(--brand);
+font-size:14px;
+}
+.settings .grid2{ margin-top:14px; margin-bottom:0; }
+
+@media print{
+html, body{ background:#fff; padding:0; height:auto !important; overflow:visible !important; }
+.toolbar, .settings, .addRowWrap, .removeCell, .discount-row{ display:none !important; }
+.sheet{ border:none; padding:0; max-width:none; overflow:visible !important; }
+/* بعض المتصفحات (خصوصًا على الجوال) لا تعرض عناصر flex/grid بشكل صحيح عند الطباعة أو الحفظ كـ PDF،
+فنحوّلها هنا لعناصر أبسط لضمان ظهور المحتوى بدل صفحة فارغة */
+.head{ display:block !important; overflow:hidden; }
+.head > div:first-child{ float:right; }
+.head .meta{ float:left; text-align:left; }
+.grid2{ display:block !important; }
+.grid2 .field{ display:block; width:100%; margin-bottom:12px; }
+.clientRow{ display:block !important; }
+.clientRow input{ display:inline-block; width:65%; }
+.honorific{ display:inline-block; margin-right:8px; }
+.table-scroll{ overflow:visible !important; }
+table{ min-width:0 !important; }
+}
+@media (max-width:640px){
+body{ padding:12px; }
+.toolbar{ justify-content:stretch; }
+.toolbar input#fileName{ min-width:0; width:100%; }
+.toolbar button{ flex:1 1 auto; }
+.sheet{ padding:22px 14px; border-radius:8px; }
+.grid2{ grid-template-columns:1fr; gap:16px; }
+.head{ flex-direction:column; gap:12px; }
+.head .meta{ text-align:right; }
+h1.title{ font-size:20px; margin:12px 0 24px; }
+.table-scroll table{ min-width:640px; }
+thead th{ padding:10px 8px; font-size:12px; }
+tbody td{ padding:10px 6px; font-size:13px; }
+.discount-row{ gap:14px; }
+.discount-row .field{ min-width:130px; }
+}
 </style>
 </head>
 <body>
 
-  <div class="toolbar">
-    <input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
-    <button class="ghost" id="resetBtn">تصفير | Reset</button>
-    <button class="primary" id="printBtn">مشاركة | Share</button>
-  </div>
+<div class="toolbar">
+<input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
+<button class="ghost" id="resetBtn">تصفير | Reset</button>
+<button class="primary" id="printBtn">مشاركة | Share</button>
+</div>
 
-  <div class="sheet">
-    <div class="head">
-      <div>
-        <img src="logo.png" alt="logo" onerror="this.style.display='none'">
-        <div class="restaurantName">مطعم كرزة</div>
-        <div class="cr">الرقم الضريبي: 310145453800003</div>
-        <div class="cr">C.R No 1010394483</div>
-      </div>
-      <div class="meta">
-        <label>التاريخ | DATE :</label>
-        <input type="date" id="quoteDate">
-      </div>
-    </div>
+<div class="sheet">
+<div class="head">
+<div>
+<img src="logo.png" alt="logo" onerror="this.style.display='none'">
+<div class="restaurantName">مطعم كرزة</div>
+<div class="cr">الرقم الضريبي: 310145453800003</div>
+<div class="cr">C.R No 1010394483</div>
+</div>
+<div class="meta">
+<label>التاريخ | DATE :</label>
+<input type="date" id="quoteDate">
+</div>
+</div>
 
-    <h1 class="title">عرض سعر | Price Quote</h1>
+<h1 class="title">عرض سعر | Price Quote</h1>
 
-    <div class="grid2">
-      <div class="field">
-        <label>اسم العميل | Client Name</label>
-        <div class="clientRow">
-          <input type="text" id="clientName" placeholder="اسم العميل">
-          <span class="honorific">المحترمين</span>
-        </div>
-      </div>
-      <div class="field">
-        <label>المدينة | City</label>
-        <input type="text" id="clientCity" placeholder="المدينة">
-      </div>
-    </div>
+<div class="grid2">
+<div class="field">
+<label>اسم العميل | Client Name</label>
+<div class="clientRow">
+<input type="text" id="clientName" placeholder="اسم العميل">
+<span class="honorific">المحترمين</span>
+</div>
+</div>
+<div class="field">
+<label>المدينة | City</label>
+<input type="text" id="clientCity" placeholder="المدينة">
+</div>
+</div>
 
-    <div class="notice">
-      المبلغ الموضح أدناه هو المبلغ الإجمالي حسب الفاتورة من السعر الأصلي<br>
-      The amount shown below is the total amount as per the invoice, based on the original price
-    </div>
+<div class="notice">
+المبلغ الموضح أدناه هو المبلغ الإجمالي حسب الفاتورة من السعر الأصلي<br>
+The amount shown below is the total amount as per the invoice, based on the original price
+</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th style="width:26%">التفاصيل | Details</th>
-          <th>عدد الأشخاص | No. of People</th>
-          <th>عدد الأيام | Days</th>
-          <th>السعر للشخص</th>
-          <th>المبلغ | Amount</th>
-          <th class="removeCell"></th>
-        </tr>
-      </thead>
-      <tbody id="itemsBody"></tbody>
-    </table>
+<div class="table-scroll">
+<table>
+<thead>
+<tr>
+<th style="width:26%">التفاصيل | Details</th>
+<th>عدد الأشخاص | No. of People</th>
+<th>عدد الأيام | Days</th>
+<th>السعر للشخص</th>
+<th>المبلغ | Amount</th>
+<th class="removeCell"></th>
+</tr>
+</thead>
+<tbody id="itemsBody"></tbody>
+</table>
+</div>
 
-    <div class="addRowWrap">
-      <button type="button" class="addRowBtn" id="addRowBtn">+ إضافة بند | Add Item</button>
-    </div>
+<div class="addRowWrap">
+<button type="button" class="addRowBtn" id="addRowBtn">+ إضافة بند | Add Item</button>
+</div>
 
-    <div class="discount-row">
-      <div class="field">
-        <label>الخصم | Discount</label>
-        <select id="discount">
-          <option value="0">بدون خصم | No Discount</option>
-          <option value="10">10%</option>
-          <option value="15">15%</option>
-          <option value="20">20%</option>
-          <option value="25">25%</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>الضريبة | VAT</label>
-        <input type="text" id="vat" value="15%" readonly>
-      </div>
-    </div>
+<div class="discount-row">
+<div class="field">
+<label>الخصم | Discount</label>
+<select id="discount">
+<option value="0">بدون خصم | No Discount</option>
+<option value="10">10%</option>
+<option value="15">15%</option>
+<option value="20">20%</option>
+<option value="25">25%</option>
+</select>
+</div>
+<div class="field">
+<label>الضريبة | VAT</label>
+<input type="text" id="vat" value="15%" readonly>
+</div>
+</div>
 
-    <table>
-      <tbody>
-        <tr class="summary" id="discountInfoRow" style="display:none">
-          <td class="label">الخصم المطبق | Discount Applied</td>
-          <td colspan="4" id="discountInfo">0%</td>
-        </tr>
-        <tr class="summary">
-          <td class="label">قبل الضريبة بعد الخصم | Before VAT (after discount)</td>
-          <td colspan="4" id="subAfterDiscount">0.00</td>
-        </tr>
-        <tr class="summary">
-          <td class="label">ضريبة القيمة المضافة | VAT Amount</td>
-          <td colspan="4" id="vatAmount">0.00</td>
-        </tr>
-        <tr class="total">
-          <td class="label">الإجمالي شامل الضريبة | Total incl. VAT</td>
-          <td colspan="4" id="grandTotal">0.00</td>
-        </tr>
-      </tbody>
-    </table>
+<table>
+<tbody>
+<tr class="summary" id="discountInfoRow" style="display:none">
+<td class="label">الخصم المطبق | Discount Applied</td>
+<td colspan="4" id="discountInfo">0%</td>
+</tr>
+<tr class="summary">
+<td class="label">قبل الضريبة بعد الخصم | Before VAT (after discount)</td>
+<td colspan="4" id="subAfterDiscount">0.00</td>
+</tr>
+<tr class="summary">
+<td class="label">ضريبة القيمة المضافة | VAT Amount</td>
+<td colspan="4" id="vatAmount">0.00</td>
+</tr>
+<tr class="total">
+<td class="label">الإجمالي شامل الضريبة | Total incl. VAT</td>
+<td colspan="4" id="grandTotal">0.00</td>
+</tr>
+</tbody>
+</table>
 
-    <div class="footer">
-      <strong>قسم المالية | Finance :</strong><br>
-      شركة الخزامى التجارية - Al kuzama Trading company<br>
-      البنك السعودي للاستثمار - Saudi Investment Bank<br>
-      SA5665000000101483617015
-    </div>
+<div class="footer">
+<strong>قسم المالية | Finance :</strong><br>
+شركة الخزامى التجارية - Al kuzama Trading company<br>
+البنك السعودي للاستثمار - Saudi Investment Bank<br>
+SA5665000000101483617015
+</div>
 
-  </div>
+</div>
 
 <script>
 (function(){
-  const itemsBody = document.getElementById('itemsBody');
+const itemsBody = document.getElementById('itemsBody');
 
-  function num(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function num(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
 
-  function createRow(){
-    const tr = document.createElement('tr');
-    tr.className = 'itemRow';
-    tr.innerHTML = `
-      <td class="label"><input type="text" class="itemLabel" placeholder="اكتب البيان هنا | Enter item description"></td>
-      <td><input type="number" class="qty" min="0" value="0"></td>
-      <td><input type="number" class="days" min="0" value="1"></td>
-      <td><input type="number" class="unitPrice" min="0" step="0.01"></td>
-      <td class="lineTotal">0.00</td>
-      <td class="removeCell"><button type="button" class="removeRowBtn" title="حذف البند">✕</button></td>
-    `;
-    tr.querySelectorAll('input').forEach(el => {
-      el.addEventListener('input', calculate);
-      el.addEventListener('change', calculate);
-    });
-    tr.querySelector('.removeRowBtn').addEventListener('click', () => {
-      if(itemsBody.querySelectorAll('tr.itemRow').length > 1){
-        tr.remove();
-        calculate();
-      }
-    });
-    return tr;
-  }
+function createRow(){
+const tr = document.createElement('tr');
+tr.className = 'itemRow';
+tr.innerHTML = `
+<td class="label"><input type="text" class="itemLabel" placeholder="اكتب البيان هنا | Enter item description"></td>
+<td><input type="number" class="qty" min="0" value="0"></td>
+<td><input type="number" class="days" min="0" value="1"></td>
+<td><input type="number" class="unitPrice" min="0" step="0.01"></td>
+<td class="lineTotal">0.00</td>
+<td class="removeCell"><button type="button" class="removeRowBtn" title="حذف البند">✕</button></td>
+`;
+tr.querySelectorAll('input').forEach(el => {
+el.addEventListener('input', calculate);
+el.addEventListener('change', calculate);
+});
+tr.querySelector('.removeRowBtn').addEventListener('click', () => {
+if(itemsBody.querySelectorAll('tr.itemRow').length > 1){
+tr.remove();
+calculate();
+}
+});
+return tr;
+}
 
-  function addRow(){
-    itemsBody.appendChild(createRow());
-  }
+function addRow(){
+itemsBody.appendChild(createRow());
+}
 
-  function calculate(){
-    let subtotal = 0;
-    itemsBody.querySelectorAll('tr.itemRow').forEach(row => {
-      const qty = num(row.querySelector('.qty').value);
-      const days = num(row.querySelector('.days').value);
-      const price = num(row.querySelector('.unitPrice').value);
-      const lineTotal = qty * days * price;
-      row.querySelector('.lineTotal').textContent = lineTotal.toFixed(2);
-      subtotal += lineTotal;
-    });
+function calculate(){
+let subtotal = 0;
+itemsBody.querySelectorAll('tr.itemRow').forEach(row => {
+const qty = num(row.querySelector('.qty').value);
+const days = num(row.querySelector('.days').value);
+const price = num(row.querySelector('.unitPrice').value);
+const lineTotal = qty * days * price;
+row.querySelector('.lineTotal').textContent = lineTotal.toFixed(2);
+subtotal += lineTotal;
+});
 
-    const discountPct = num(document.getElementById('discount').value);
-    const vatPct = num(document.getElementById('vat').value);
+const discountPct = num(document.getElementById('discount').value);
+const vatPct = num(document.getElementById('vat').value);
 
-    // الأسعار المُدخلة شاملة الضريبة، فالخصم يُطبّق على الإجمالي الشامل
-    // ثم نستخرج قيمة الضريبة من داخل هذا الإجمالي بدل إضافتها من جديد
-    const grandTotal = subtotal * (1 - discountPct / 100);
-    const preTax = grandTotal / (1 + vatPct / 100);
-    const vatAmount = grandTotal - preTax;
+// الأسعار المُدخلة شاملة الضريبة، فالخصم يُطبّق على الإجمالي الشامل
+// ثم نستخرج قيمة الضريبة من داخل هذا الإجمالي بدل إضافتها من جديد
+const grandTotal = subtotal * (1 - discountPct / 100);
+const preTax = grandTotal / (1 + vatPct / 100);
+const vatAmount = grandTotal - preTax;
 
-    const discountRow = document.getElementById('discountInfoRow');
-    if(discountPct > 0){
-      discountRow.style.display = '';
-      document.getElementById('discountInfo').textContent = discountPct + '%';
-    } else {
-      discountRow.style.display = 'none';
-    }
+const discountRow = document.getElementById('discountInfoRow');
+if(discountPct > 0){
+discountRow.style.display = '';
+document.getElementById('discountInfo').textContent = discountPct + '%';
+} else {
+discountRow.style.display = 'none';
+}
 
-    document.getElementById('subAfterDiscount').textContent = preTax.toFixed(2);
-    document.getElementById('vatAmount').textContent = vatAmount.toFixed(2);
-    document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
-  }
+document.getElementById('subAfterDiscount').textContent = preTax.toFixed(2);
+document.getElementById('vatAmount').textContent = vatAmount.toFixed(2);
+document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+}
 
-  document.getElementById('addRowBtn').addEventListener('click', addRow);
-  document.getElementById('discount').addEventListener('change', calculate);
-  document.getElementById('vat').addEventListener('input', calculate);
+document.getElementById('addRowBtn').addEventListener('click', addRow);
+document.getElementById('discount').addEventListener('change', calculate);
+document.getElementById('vat').addEventListener('input', calculate);
 
-  document.getElementById('quoteDate').valueAsDate = new Date();
+document.getElementById('quoteDate').valueAsDate = new Date();
 
-  const defaultTitle = document.title;
-  document.getElementById('printBtn').addEventListener('click', () => {
-    const fileName = document.getElementById('fileName').value.trim();
-    document.title = fileName ? fileName : defaultTitle;
-    window.print();
-  });
-  window.addEventListener('afterprint', () => {
-    document.title = defaultTitle;
-  });
+const defaultTitle = document.title;
+document.getElementById('printBtn').addEventListener('click', () => {
+const fileName = document.getElementById('fileName').value.trim();
+document.title = fileName ? fileName : defaultTitle;
+window.print();
+});
+window.addEventListener('afterprint', () => {
+document.title = defaultTitle;
+});
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    document.getElementById('fileName').value = '';
-    document.getElementById('clientName').value = '';
-    document.getElementById('clientCity').value = '';
-    document.getElementById('discount').value = '0';
-    document.getElementById('quoteDate').valueAsDate = new Date();
-    itemsBody.innerHTML = '';
-    addRow();
-    calculate();
-  });
+document.getElementById('resetBtn').addEventListener('click', () => {
+document.getElementById('fileName').value = '';
+document.getElementById('clientName').value = '';
+document.getElementById('clientCity').value = '';
+document.getElementById('discount').value = '0';
+document.getElementById('quoteDate').valueAsDate = new Date();
+itemsBody.innerHTML = '';
+addRow();
+calculate();
+});
 
-  addRow();
-  calculate();
+addRow();
+calculate();
 })();
 </script>
 </body>
