@@ -24,24 +24,22 @@ padding:24px;
 max-width:900px;
 margin:0 auto 16px;
 display:flex;
+flex-direction:column;
+gap:10px;
+}
+.toolbar-buttons{
+display:flex;
 gap:10px;
 justify-content:flex-end;
-flex-wrap:wrap;
-align-items:center;
 }
-.toolbar #resetBtn{ order:1; }
-.toolbar #printBtn{ order:2; }
 .toolbar input#fileName{
-order:3;
-flex:1;
 width:100%;
-min-width:220px;
+box-sizing:border-box;
 padding:9px 12px;
 border-radius:8px;
 border:1px solid var(--line);
 font-family:inherit;
 font-size:14px;
-margin-top:4px;
 }
 button{
 font-family:inherit;
@@ -254,9 +252,7 @@ tbody tr.summary td, tbody tr.total td{ padding:5px 6px !important; font-size:10
 }
 @media (max-width:640px){
 body{ padding:12px; }
-.toolbar{ justify-content:stretch; }
-.toolbar input#fileName{ min-width:0; margin-top:8px; }
-.toolbar button{ flex:1 1 auto; }
+.toolbar-buttons button{ flex:1 1 auto; }
 .sheet{ padding:22px 14px; border-radius:8px; }
 .grid2{ grid-template-columns:1fr; gap:16px; }
 .head{ flex-direction:column; gap:12px; }
@@ -273,9 +269,11 @@ tbody td{ padding:10px 6px; font-size:13px; }
 <body>
 
 <div class="toolbar">
-<input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
+<div class="toolbar-buttons">
 <button class="ghost" id="resetBtn">تصفير | Reset</button>
 <button class="primary" id="printBtn">مشاركة | Share</button>
+</div>
+<input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
 </div>
 
 <div class="sheet">
