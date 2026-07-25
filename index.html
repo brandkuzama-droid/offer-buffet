@@ -141,6 +141,9 @@ font-weight:600;
 font-size:13px;
 white-space:nowrap;
 }
+thead th[contenteditable]{ cursor:text; outline:none; }
+thead th[contenteditable]:hover{ background:rgba(255,255,255,.12); }
+thead th[contenteditable]:focus{ background:rgba(255,255,255,.18); box-shadow:inset 0 0 0 1px rgba(255,255,255,.7); border-radius:4px; white-space:normal; }
 tbody td{
 border:1px solid var(--line);
 padding:14px 10px;
@@ -156,15 +159,27 @@ padding:6px;
 text-align:center;
 font-family:inherit;
 }
-tbody td.label input.itemLabel{
+tbody td.label textarea.itemLabel{
+width:100%;
+display:block;
 text-align:right;
 font-weight:600;
 border:1px solid transparent;
 background:transparent;
+font-family:inherit;
+font-size:14px;
+resize:none;
+overflow:hidden;
+white-space:pre-wrap;
+word-break:break-word;
+line-height:1.4;
+padding:6px;
+min-height:32px;
 }
-tbody td.label input.itemLabel:focus{
+tbody td.label textarea.itemLabel:focus{
 border:1px solid var(--line);
 background:#fff;
+outline:none;
 }
 tbody tr.summary td{ background:#faf7f5; font-weight:700; }
 tbody tr.total td{ background:var(--brand); color:#fff; font-weight:700; font-size:15px; }
@@ -245,8 +260,9 @@ h1.title{ font-size:17px !important; margin:6px 0 12px !important; }
 .notice{ padding:7px 10px !important; margin:6px 0 10px !important; font-size:9.5px !important; line-height:1.5 !important; }
 .table-scroll{ overflow:visible !important; margin-top:6px !important; }
 table{ min-width:0 !important; font-size:10.5px !important; }
-thead th{ padding:5px 5px !important; font-size:9.5px !important; }
+thead th{ padding:5px 5px !important; font-size:9.5px !important; white-space:normal !important; }
 tbody td{ padding:5px 5px !important; }
+tbody td.label textarea.itemLabel{ font-size:10.5px !important; padding:3px !important; min-height:0 !important; }
 tbody tr.summary td, tbody tr.total td{ padding:5px 6px !important; font-size:10.5px !important; }
 .footer{ margin-top:10px !important; padding-top:6px !important; font-size:9.5px !important; line-height:1.5 !important; }
 }
@@ -314,10 +330,10 @@ The amount shown below is the total amount as per the invoice, based on the orig
 <table>
 <thead>
 <tr>
-<th style="width:26%">التفاصيل | Details</th>
-<th>عدد الأشخاص | No. of People</th>
-<th>عدد الأيام | Days</th>
-<th>السعر للشخص</th>
+<th style="width:26%" contenteditable="true">التفاصيل | Details</th>
+<th contenteditable="true">عدد الأشخاص | No. of People</th>
+<th contenteditable="true">عدد الأيام | Days</th>
+<th contenteditable="true">السعر للشخص</th>
 <th>المبلغ | Amount</th>
 <th class="removeCell"></th>
 </tr>
@@ -387,7 +403,7 @@ function createRow(){
 const tr = document.createElement('tr');
 tr.className = 'itemRow';
 tr.innerHTML = `
-<td class="label"><input type="text" class="itemLabel" placeholder="اكتب البيان هنا | Enter item description"></td>
+<td class="label"><textarea class="itemLabel" rows="1" placeholder="اكتب البيان هنا | Enter item description"></textarea></td>
 <td><input type="number" class="qty" min="0" value="0"></td>
 <td><input type="number" class="days" min="0" value="1"></td>
 <td><input type="number" class="unitPrice" min="0" step="0.01"></td>
@@ -398,6 +414,13 @@ tr.querySelectorAll('input').forEach(el => {
 el.addEventListener('input', calculate);
 el.addEventListener('change', calculate);
 });
+const labelEl = tr.querySelector('.itemLabel');
+const autoGrowLabel = () => {
+labelEl.style.height = 'auto';
+labelEl.style.height = labelEl.scrollHeight + 'px';
+};
+labelEl.addEventListener('input', autoGrowLabel);
+autoGrowLabel();
 tr.querySelector('.removeRowBtn').addEventListener('click', () => {
 if(itemsBody.querySelectorAll('tr.itemRow').length > 1){
 tr.remove();
