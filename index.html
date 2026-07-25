@@ -183,6 +183,19 @@ outline:none;
 }
 tbody tr.summary td{ background:#faf7f5; font-weight:700; }
 tbody tr.total td{ background:var(--brand); color:#fff; font-weight:700; font-size:15px; }
+.totalInput{
+width:100%;
+background:transparent;
+border:1px solid transparent;
+color:#fff;
+font-weight:700;
+font-size:15px;
+font-family:inherit;
+text-align:center;
+padding:4px 6px;
+border-radius:6px;
+}
+.totalInput:focus{ border:1px solid rgba(255,255,255,.7); background:rgba(255,255,255,.12); outline:none; }
 
 .removeCell{ width:36px; }
 td.removeCell{ padding:4px !important; }
@@ -264,6 +277,7 @@ thead th{ padding:5px 5px !important; font-size:9.5px !important; white-space:no
 tbody td{ padding:5px 5px !important; }
 tbody td.label textarea.itemLabel{ font-size:10.5px !important; padding:3px !important; min-height:0 !important; }
 tbody tr.summary td, tbody tr.total td{ padding:5px 6px !important; font-size:10.5px !important; }
+.totalInput{ font-size:10.5px !important; padding:2px 4px !important; }
 .footer{ margin-top:10px !important; padding-top:6px !important; font-size:9.5px !important; line-height:1.5 !important; }
 }
 @media (max-width:640px){
@@ -379,7 +393,7 @@ The amount shown below is the total amount as per the invoice, based on the orig
 </tr>
 <tr class="total">
 <td class="label">الإجمالي شامل الضريبة | Total incl. VAT</td>
-<td colspan="4" id="grandTotal">0.00</td>
+<td colspan="4"><input type="text" id="grandTotal" class="totalInput" value="0.00" inputmode="decimal"></td>
 </tr>
 </tbody>
 </table>
@@ -464,8 +478,19 @@ discountRow.style.display = 'none';
 
 document.getElementById('subAfterDiscount').textContent = preTax.toFixed(2);
 document.getElementById('vatAmount').textContent = vatAmount.toFixed(2);
-document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+document.getElementById('grandTotal').value = grandTotal.toFixed(2);
 }
+
+// تعديل يدوي للإجمالي: لو المستخدم غيّر الرقم بنفسه، نعيد حساب الضريبة والمبلغ قبلها من هذا الرقم مباشرة
+// وإذا تغيّر أي بند أو الخصم بعدها، يرجع الحساب التلقائي من جديد
+document.getElementById('grandTotal').addEventListener('input', () => {
+const manualTotal = num(document.getElementById('grandTotal').value);
+const vatPct = num(document.getElementById('vat').value);
+const preTax = manualTotal / (1 + vatPct / 100);
+const vatAmount = manualTotal - preTax;
+document.getElementById('subAfterDiscount').textContent = preTax.toFixed(2);
+document.getElementById('vatAmount').textContent = vatAmount.toFixed(2);
+});
 
 document.getElementById('addRowBtn').addEventListener('click', addRow);
 document.getElementById('discount').addEventListener('change', calculate);
