@@ -67,12 +67,11 @@ border-bottom:2px solid var(--brand);
 padding-bottom:24px;
 margin-bottom:36px;
 }
-.head img{ max-height:70px; }
+.head img{ max-height:92px; width:auto; display:block; margin-bottom:6px; }
 .head .meta{ text-align:left; font-size:13px; }
 .head .meta label{ display:block; margin-bottom:6px; color:#666; }
 .head .meta input[type=date]{ border:1px solid var(--line); border-radius:6px; padding:5px 8px; font-family:inherit; }
 .cr{ font-size:12px; color:#777; margin-top:4px; }
-.restaurantName{ font-size:15px; font-weight:700; color:var(--brand); margin-top:8px; }
 
 h1.title{
 text-align:center;
@@ -220,22 +219,33 @@ font-size:14px;
 .settings .grid2{ margin-top:14px; margin-bottom:0; }
 
 @media print{
+@page{ margin:9mm; }
 *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
-html, body{ background:#fff; padding:0; height:auto !important; overflow:visible !important; }
+html, body{ background:#fff; padding:0; height:auto !important; overflow:visible !important; font-size:12px; }
 .toolbar, .settings, .addRowWrap, .removeCell, .discount-row{ display:none !important; }
 .sheet{ border:none; padding:0; max-width:none; overflow:visible !important; }
 /* بعض المتصفحات (خصوصًا على الجوال) لا تعرض عناصر flex/grid بشكل صحيح عند الطباعة أو الحفظ كـ PDF،
-فنحوّلها هنا لعناصر أبسط لضمان ظهور المحتوى بدل صفحة فارغة */
-.head{ display:block !important; overflow:hidden; }
+فنحوّلها هنا لعناصر أبسط لضمان ظهور المحتوى بدل صفحة فارغة، وكل القياسات مضغوطة عشان يصير المحتوى صفحة وحدة */
+.head{ display:block !important; overflow:hidden; padding-bottom:8px !important; margin-bottom:10px !important; }
 .head > div:first-child{ float:right; }
 .head .meta{ float:left; text-align:left; }
-.grid2{ display:block !important; }
-.grid2 .field{ display:block; width:100%; margin-bottom:12px; }
+.head img{ max-height:50px !important; margin-bottom:3px !important; }
+.cr{ font-size:10px !important; margin-top:2px !important; }
+h1.title{ font-size:17px !important; margin:6px 0 12px !important; }
+.grid2{ display:block !important; margin-bottom:8px !important; }
+.grid2 .field{ display:block; width:100%; margin-bottom:5px; }
+.field label{ font-size:10px !important; margin-bottom:2px !important; }
 .clientRow{ display:block !important; }
 .clientRow input{ display:inline-block; width:65%; }
 .honorific{ display:inline-block; margin-right:8px; }
-.table-scroll{ overflow:visible !important; }
-table{ min-width:0 !important; }
+.field input, .field select{ padding:5px 7px !important; font-size:11px !important; }
+.notice{ padding:7px 10px !important; margin:6px 0 10px !important; font-size:9.5px !important; line-height:1.5 !important; }
+.table-scroll{ overflow:visible !important; margin-top:6px !important; }
+table{ min-width:0 !important; font-size:10.5px !important; }
+thead th{ padding:5px 5px !important; font-size:9.5px !important; }
+tbody td{ padding:5px 5px !important; }
+tbody tr.summary td, tbody tr.total td{ padding:5px 6px !important; font-size:10.5px !important; }
+.footer{ margin-top:10px !important; padding-top:6px !important; font-size:9.5px !important; line-height:1.5 !important; }
 }
 @media (max-width:640px){
 body{ padding:12px; }
@@ -268,8 +278,7 @@ tbody td{ padding:10px 6px; font-size:13px; }
 <div class="sheet">
 <div class="head">
 <div>
-<img src="logo.png" alt="logo" onerror="this.style.display='none'">
-<div class="restaurantName">مطعم كرزة</div>
+<img src="logo.png" alt="مطعم كرزة" onerror="this.style.display='none'">
 <div class="cr">الرقم الضريبي: 310145453800003</div>
 <div class="cr">C.R No 1010394483</div>
 </div>
@@ -444,7 +453,7 @@ const defaultTitle = document.title;
 document.getElementById('printBtn').addEventListener('click', () => {
 const fileName = document.getElementById('fileName').value.trim();
 document.title = fileName ? fileName : defaultTitle;
-window.print();
+setTimeout(() => { window.print(); }, 80);
 });
 window.addEventListener('afterprint', () => {
 document.title = defaultTitle;
