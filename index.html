@@ -345,6 +345,35 @@ min-height:16px;
 }
 #appContent{ display:none; }
 .logoutBtn{ background:#fff; color:var(--brand); border-color:var(--brand); }
+
+/* ===== Platform additions: sync banner, tabs, clients & quotes lists ===== */
+#syncBanner{ max-width:900px; margin:0 auto 14px; border:1px solid; border-radius:10px; padding:10px 16px; font-size:12.5px; display:none; }
+.pqTabs{ max-width:900px; margin:0 auto 16px; display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px; gap:2px; }
+.pqTab{ padding:9px 20px; border-radius:999px; cursor:pointer; color:#7c7271; font-weight:600; font-size:13.5px; transition:background .15s,color .15s; }
+.pqTab.active{ color:#fff; background:var(--brand); }
+.viewSheet{ max-width:900px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:10px; padding:32px 36px; }
+.viewSheet h2{ margin:0; color:var(--brand); font-size:19px; }
+.viewHead{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; gap:12px; flex-wrap:wrap; }
+.empty-state{ color:#8a8078; font-size:13.5px; text-align:center; padding:30px 0; }
+.addClientForm{ display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; margin-bottom:24px; align-items:end; }
+.addClientForm .field{ margin:0; }
+.addClientForm .field label{ display:block; font-size:12px; color:#555; margin-bottom:5px; }
+.addClientForm .field input{ width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font-family:inherit; font-size:13.5px; }
+.clientCard, .quoteCard{ display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:10px; flex-wrap:wrap; }
+.clientInfo, .quoteInfo{ flex:1; min-width:160px; }
+.clientName, .quoteClient{ font-weight:700; font-size:14.5px; margin-bottom:3px; }
+.clientMeta, .quoteMeta{ font-size:12px; color:#8a8078; }
+.quoteTotal{ font-weight:700; color:var(--brand); font-size:14px; white-space:nowrap; }
+.clientActions, .quoteActions{ display:flex; gap:8px; }
+.clientActions button, .quoteActions button{ padding:6px 12px; font-size:12.5px; }
+#clientPickerField{ margin-bottom:18px; }
+@media (max-width:640px){
+.addClientForm{ grid-template-columns:1fr; }
+.viewSheet{ padding:22px 16px; }
+}
+@media print{
+.pqTabs, #syncBanner, #clientPickerField, #clientsView, #quotesView{ display:none !important; }
+}
 </style>
 </head>
 <body>
@@ -370,10 +399,21 @@ min-height:16px;
 
 <div id="appContent">
 
+<div id="syncBanner"></div>
+
+<div class="pqTabs" id="pqTabs">
+<div class="pqTab active" data-view="quote">عرض سعر جديد | New Quote</div>
+<div class="pqTab" data-view="clients">العملاء | Clients</div>
+<div class="pqTab" data-view="quotes">العروض المحفوظة | Saved Quotes</div>
+</div>
+
+<div id="quoteView">
+
 <div class="toolbar">
 <div class="toolbar-buttons">
 <button class="ghost" id="resetBtn">تصفير | Reset</button>
 <button class="ghost logoutBtn" id="logoutBtn">خروج | Logout</button>
+<button class="primary" id="saveQuoteBtn">حفظ | Save</button>
 <button class="primary" id="printBtn">مشاركة | Share</button>
 </div>
 <input type="text" id="fileName" placeholder="اسم الملف عند الحفظ | File name when saving">
@@ -393,6 +433,11 @@ min-height:16px;
 </div>
 
 <h1 class="title">عرض سعر | Price Quote</h1>
+
+<div class="field" id="clientPickerField">
+<label>اختيار عميل محفوظ (اختياري) | Select Saved Client</label>
+<select id="clientPicker"><option value="">-- عميل جديد | New Client --</option></select>
+</div>
 
 <div class="grid2">
 <div class="field">
@@ -482,6 +527,39 @@ SA5665000000101483617015
 
 </div>
 
+<div id="clientsView" style="display:none;">
+<div class="viewSheet">
+<div class="viewHead">
+<h2>العملاء | Clients</h2>
+</div>
+<form class="addClientForm" id="addClientForm">
+<div class="field">
+<label>اسم العميل | Name</label>
+<input type="text" id="newClientName" placeholder="اسم العميل" required>
+</div>
+<div class="field">
+<label>المدينة | City</label>
+<input type="text" id="newClientCity" placeholder="المدينة">
+</div>
+<div class="field">
+<label>جوال | Phone</label>
+<input type="text" id="newClientPhone" placeholder="رقم الجوال">
+</div>
+<button type="submit" class="primary">+ إضافة عميل</button>
+</form>
+<div id="clientsList"></div>
+</div>
+</div>
+
+<div id="quotesView" style="display:none;">
+<div class="viewSheet">
+<div class="viewHead">
+<h2>العروض المحفوظة | Saved Quotes</h2>
+</div>
+<div id="quotesList"></div>
+</div>
+</div>
+
 <script>
 (function(){
 // ===== Login Gate =====
@@ -500,6 +578,11 @@ const loginError = document.getElementById('loginError');
 function showApp(){
 loginGate.style.display = 'none';
 appContent.style.display = 'block';
+loadPqData().then(()=>{
+renderClientPicker();
+renderClientsList();
+renderQuotesList();
+});
 }
 function showGate(){
 appContent.style.display = 'none';
@@ -527,6 +610,301 @@ showApp();
 loginError.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة | Incorrect email or password';
 }
 });
+
+// ===== Shared storage (JSONBin.io) — saved clients & quotes =====
+const JSONBIN_BIN_ID = '6a746369f5f4af5e29f2526f';
+const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
+const JSONBIN_KEY_STORAGE = 'kz_pq_jsonbin_master_key';
+let pqData = { clients: [], quotes: [] };
+let dataLoaded = false;
+let currentEditingQuoteId = null;
+
+function escapeHtml(s){
+return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function currentSessionEmail(){ return localStorage.getItem(SESSION_KEY) || ''; }
+
+function getMasterKey(){ return localStorage.getItem(JSONBIN_KEY_STORAGE) || ''; }
+async function ensureMasterKey(){
+let key = getMasterKey();
+if(!key){
+key = window.prompt('أول مرة تستخدم المنصة من هذا الجهاز:\nألصق "مفتاح الحفظ" (Master Key) من JSONBin.io، وبيتذكره المتصفح تلقائيًا بعد كذا.');
+if(key){ key = key.trim(); localStorage.setItem(JSONBIN_KEY_STORAGE, key); }
+}
+return key;
+}
+function showSyncBanner(msg, isError){
+const el = document.getElementById('syncBanner');
+if(!el) return;
+if(!msg){ el.style.display = 'none'; return; }
+el.textContent = msg;
+el.style.display = 'block';
+el.style.background = isError ? '#fdeceb' : '#e5f6ea';
+el.style.color = isError ? '#b3261e' : '#2f9e56';
+el.style.borderColor = isError ? '#f3c8c5' : '#cdeed9';
+}
+async function loadPqData(){
+const key = await ensureMasterKey();
+if(!key){
+dataLoaded = false;
+showSyncBanner('أدخل مفتاح الحفظ (Master Key) عشان تقدر تشوف العملاء والعروض المحفوظة.', true);
+return;
+}
+try{
+const res = await fetch(JSONBIN_BASE_URL + '/latest', { cache:'no-store', headers:{ 'X-Master-Key': key } });
+if(res.status === 401 || res.status === 403){
+localStorage.removeItem(JSONBIN_KEY_STORAGE);
+throw new Error('مفتاح الحفظ غير صحيح');
+}
+if(!res.ok) throw new Error('HTTP ' + res.status);
+const json = await res.json();
+pqData = json.record || { clients: [], quotes: [] };
+if(!Array.isArray(pqData.clients)) pqData.clients = [];
+if(!Array.isArray(pqData.quotes)) pqData.quotes = [];
+dataLoaded = true;
+showSyncBanner('', false);
+}catch(e){
+dataLoaded = false;
+showSyncBanner('تعذر تحميل البيانات المحفوظة: ' + e.message + ' — حدّث الصفحة وجرب مرة ثانية.', true);
+}
+}
+async function savePqData(){
+if(!dataLoaded){
+alert('تعذر تحميل البيانات الحالية من السيرفر، فما راح يتم الحفظ حتى ما تنمسح بيانات موجودة. حدّث الصفحة وجرب مرة ثانية.');
+return false;
+}
+const key = await ensureMasterKey();
+if(!key){
+alert('لازم تدخل مفتاح الحفظ (Master Key) عشان يتم الحفظ.');
+return false;
+}
+try{
+const res = await fetch(JSONBIN_BASE_URL, {
+method: 'PUT',
+headers: { 'Content-Type': 'application/json', 'X-Master-Key': key },
+body: JSON.stringify(pqData)
+});
+if(!res.ok) throw new Error('HTTP ' + res.status);
+showSyncBanner('', false);
+return true;
+}catch(e){
+localStorage.removeItem(JSONBIN_KEY_STORAGE);
+alert('تعذر الحفظ. تأكد إن مفتاح الحفظ صحيح، ثم جرب مرة ثانية.\n' + e.message);
+return false;
+}
+}
+
+// ===== Tabs =====
+function switchView(view){
+['quote','clients','quotes'].forEach(v=>{
+const el = document.getElementById(v + 'View');
+if(el) el.style.display = (v === view) ? 'block' : 'none';
+});
+document.querySelectorAll('.pqTab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+if(view === 'clients') renderClientsList();
+if(view === 'quotes') renderQuotesList();
+}
+document.querySelectorAll('.pqTab').forEach(t => t.addEventListener('click', () => switchView(t.dataset.view)));
+
+// ===== Clients =====
+function renderClientPicker(){
+const sel = document.getElementById('clientPicker');
+if(!sel) return;
+const current = sel.value;
+const sorted = pqData.clients.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+sel.innerHTML = '<option value="">-- عميل جديد | New Client --</option>' +
+sorted.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.city ? (' — ' + escapeHtml(c.city)) : ''}</option>`).join('');
+if(current) sel.value = current;
+}
+function findOrCreateClient(name, city){
+if(!name) return null;
+let c = pqData.clients.find(x => x.name.trim() === name.trim());
+if(c){
+if(city && !c.city) c.city = city;
+return c.id;
+}
+const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+c = { id, name, city: city || '', phone: '', createdAt: new Date().toISOString(), createdBy: currentSessionEmail() };
+pqData.clients.push(c);
+return id;
+}
+function renderClientsList(){
+const el = document.getElementById('clientsList');
+if(!el) return;
+if(!pqData.clients.length){
+el.innerHTML = '<div class="empty-state">لا يوجد عملاء محفوظين بعد.</div>';
+return;
+}
+const sorted = pqData.clients.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+el.innerHTML = sorted.map(c => {
+const qCount = pqData.quotes.filter(q => q.clientId === c.id).length;
+const metaParts = [c.city || '—'];
+if(c.phone) metaParts.push(c.phone);
+metaParts.push(qCount + ' عرض سعر');
+return `<div class="clientCard">
+<div class="clientInfo">
+<div class="clientName">${escapeHtml(c.name)}</div>
+<div class="clientMeta">${escapeHtml(metaParts.join(' · '))}</div>
+</div>
+<div class="clientActions">
+<button type="button" class="ghost" onclick="startQuoteForClient('${c.id}')">عرض سعر جديد</button>
+<button type="button" class="ghost" onclick="deleteClient('${c.id}')">حذف</button>
+</div>
+</div>`;
+}).join('');
+}
+function startQuoteForClient(id){
+const c = pqData.clients.find(x => x.id === id);
+if(!c) return;
+document.getElementById('resetBtn').click();
+document.getElementById('clientName').value = c.name;
+document.getElementById('clientCity').value = c.city || '';
+const picker = document.getElementById('clientPicker');
+if(picker) picker.value = c.id;
+switchView('quote');
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+async function deleteClient(id){
+const qCount = pqData.quotes.filter(q => q.clientId === id).length;
+const msg = qCount
+? ('هذا العميل مرتبط بـ ' + qCount + ' عرض سعر محفوظ. حذف العميل ما يحذف عروضه، بس تصير غير مرتبطة بعميل محفوظ. تأكيد الحذف؟')
+: 'تأكيد حذف العميل؟';
+if(!confirm(msg)) return;
+pqData.clients = pqData.clients.filter(c => c.id !== id);
+const ok = await savePqData();
+if(ok){ renderClientsList(); renderClientPicker(); }
+}
+document.getElementById('addClientForm').addEventListener('submit', async function(e){
+e.preventDefault();
+const name = document.getElementById('newClientName').value.trim();
+const city = document.getElementById('newClientCity').value.trim();
+const phone = document.getElementById('newClientPhone').value.trim();
+if(!name) return;
+if(pqData.clients.some(c => c.name.trim() === name)){
+alert('يوجد عميل بنفس الاسم مسبقًا.');
+return;
+}
+const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+pqData.clients.push({ id, name, city, phone, createdAt: new Date().toISOString(), createdBy: currentSessionEmail() });
+const ok = await savePqData();
+if(ok){
+this.reset();
+renderClientsList();
+renderClientPicker();
+}
+});
+document.getElementById('clientPicker').addEventListener('change', function(){
+const c = pqData.clients.find(x => x.id === this.value);
+if(c){
+document.getElementById('clientName').value = c.name;
+document.getElementById('clientCity').value = c.city || '';
+}
+});
+
+// ===== Quotes =====
+function collectQuoteFromForm(){
+const items = [];
+itemsBody.querySelectorAll('tr.itemRow').forEach(row => {
+items.push({
+label: row.querySelector('.itemLabel').value,
+qty: num(row.querySelector('.qty').value),
+days: num(row.querySelector('.days').value),
+price: num(row.querySelector('.unitPrice').value),
+lineTotal: num(row.querySelector('.lineTotal').textContent)
+});
+});
+return {
+clientName: document.getElementById('clientName').value.trim(),
+clientCity: document.getElementById('clientCity').value.trim(),
+date: document.getElementById('quoteDate').value,
+items,
+discountPct: num(document.getElementById('discount').value),
+discountInfo: document.getElementById('discountInfo').textContent,
+subAfterDiscount: document.getElementById('subAfterDiscount').textContent,
+vatAmount: document.getElementById('vatAmount').textContent,
+grandTotal: document.getElementById('grandTotal').value,
+fileName: document.getElementById('fileName').value.trim()
+};
+}
+async function saveCurrentQuote(){
+const data = collectQuoteFromForm();
+if(!data.clientName){
+alert('اكتب اسم العميل قبل الحفظ.');
+return;
+}
+const clientId = findOrCreateClient(data.clientName, data.clientCity);
+if(currentEditingQuoteId && pqData.quotes.some(q => q.id === currentEditingQuoteId)){
+const idx = pqData.quotes.findIndex(q => q.id === currentEditingQuoteId);
+pqData.quotes[idx] = Object.assign({}, pqData.quotes[idx], data, { clientId, updatedAt: new Date().toISOString() });
+} else {
+const id = 'q_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+pqData.quotes.push(Object.assign({ id, clientId, createdAt: new Date().toISOString(), createdBy: currentSessionEmail() }, data));
+currentEditingQuoteId = id;
+}
+const ok = await savePqData();
+if(ok){
+renderClientPicker();
+renderClientsList();
+renderQuotesList();
+alert('تم حفظ عرض السعر ✅');
+}
+}
+function renderQuotesList(){
+const el = document.getElementById('quotesList');
+if(!el) return;
+if(!pqData.quotes.length){
+el.innerHTML = '<div class="empty-state">لا يوجد عروض أسعار محفوظة بعد.</div>';
+return;
+}
+const sorted = pqData.quotes.slice().sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+el.innerHTML = sorted.map(q => {
+return `<div class="quoteCard">
+<div class="quoteInfo">
+<div class="quoteClient">${escapeHtml(q.clientName || '—')}</div>
+<div class="quoteMeta">${escapeHtml(q.date || '')} · ${escapeHtml(q.fileName || 'بدون اسم ملف')}</div>
+</div>
+<div class="quoteTotal">${escapeHtml(q.grandTotal || '0.00')} ر.س</div>
+<div class="quoteActions">
+<button type="button" class="ghost" onclick="loadQuoteIntoForm('${q.id}')">فتح</button>
+<button type="button" class="ghost" onclick="deleteQuote('${q.id}')">حذف</button>
+</div>
+</div>`;
+}).join('');
+}
+function loadQuoteIntoForm(id){
+const q = pqData.quotes.find(x => x.id === id);
+if(!q) return;
+currentEditingQuoteId = id;
+document.getElementById('fileName').value = q.fileName || '';
+document.getElementById('clientName').value = q.clientName || '';
+document.getElementById('clientCity').value = q.clientCity || '';
+if(q.date) document.getElementById('quoteDate').value = q.date;
+document.getElementById('discount').value = String(q.discountPct || 0);
+const picker = document.getElementById('clientPicker');
+if(picker) picker.value = q.clientId || '';
+itemsBody.innerHTML = '';
+const rows = (q.items && q.items.length) ? q.items : [{}];
+rows.forEach(it => {
+const tr = createRow();
+itemsBody.appendChild(tr);
+if(it.label != null) tr.querySelector('.itemLabel').value = it.label;
+tr.querySelector('.qty').value = it.qty != null ? it.qty : 0;
+tr.querySelector('.days').value = it.days != null ? it.days : 1;
+tr.querySelector('.unitPrice').value = it.price != null ? it.price : '';
+tr.querySelector('.itemLabel').dispatchEvent(new Event('input'));
+});
+calculate();
+switchView('quote');
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+async function deleteQuote(id){
+if(!confirm('تأكيد حذف عرض السعر؟')) return;
+pqData.quotes = pqData.quotes.filter(q => q.id !== id);
+if(currentEditingQuoteId === id) currentEditingQuoteId = null;
+const ok = await savePqData();
+if(ok) renderQuotesList();
+}
+document.getElementById('saveQuoteBtn').addEventListener('click', saveCurrentQuote);
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
 localStorage.removeItem(SESSION_KEY);
@@ -633,11 +1011,14 @@ document.title = defaultTitle;
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
+currentEditingQuoteId = null;
 document.getElementById('fileName').value = '';
 document.getElementById('clientName').value = '';
 document.getElementById('clientCity').value = '';
 document.getElementById('discount').value = '0';
 document.getElementById('quoteDate').valueAsDate = new Date();
+const picker = document.getElementById('clientPicker');
+if(picker) picker.value = '';
 itemsBody.innerHTML = '';
 addRow();
 calculate();
