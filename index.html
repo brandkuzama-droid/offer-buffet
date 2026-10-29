@@ -355,7 +355,7 @@ min-height:16px;
 .viewSheet h2{ margin:0; color:var(--brand); font-size:19px; }
 .viewHead{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; gap:12px; flex-wrap:wrap; }
 .empty-state{ color:#8a8078; font-size:13.5px; text-align:center; padding:30px 0; }
-.addClientForm{ display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; margin-bottom:24px; align-items:end; }
+.addClientForm{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; align-items:end; }
 .addClientForm .field{ margin:0; }
 .addClientForm .field label{ display:block; font-size:12px; color:#555; margin-bottom:5px; }
 .addClientForm .field input{ width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:7px; font-family:inherit; font-size:13.5px; }
@@ -372,9 +372,14 @@ min-height:16px;
 .viewSheet{ padding:22px 16px; }
 }
 @media print{
+.printHide, .noPrint, #fLogo label{ display:none !important; }
 .pqTabs, #syncBanner, #clientPickerField, #clientsView, #quotesView{ display:none !important; }
 }
+.logoBox{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.logoBox img{ max-height:60px; max-width:160px; display:none; border:1px solid var(--line); border-radius:6px; padding:3px; background:#fff; }
+.clientLogoThumb{ max-height:38px; max-width:70px; border-radius:6px; margin-inline-end:10px; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -440,16 +445,37 @@ min-height:16px;
 </div>
 
 <div class="grid2">
-<div class="field">
-<label>اسم العميل | Client Name</label>
+<div class="field" id="fCompany">
+<label>اسم الشركة | Company</label>
 <div class="clientRow">
-<input type="text" id="clientName" placeholder="اسم العميل">
+<input type="text" id="clientCompany" placeholder="اختياري">
 <span class="honorific">المحترمين</span>
 </div>
 </div>
-<div class="field">
+<div class="field" id="fPerson">
+<label>اسم الشخص | Contact Person</label>
+<input type="text" id="clientPerson" placeholder="اختياري">
+</div>
+<div class="field" id="fVat">
+<label>الرقم الضريبي | VAT No.</label>
+<input type="text" id="clientVat" placeholder="اختياري">
+</div>
+<div class="field" id="fCr">
+<label>رقم السجل التجاري | C.R No.</label>
+<input type="text" id="clientCr" placeholder="اختياري">
+</div>
+<div class="field" id="fCity">
 <label>المدينة | City</label>
-<input type="text" id="clientCity" placeholder="المدينة">
+<input type="text" id="clientCity" placeholder="اختياري">
+</div>
+</div>
+
+<div class="field" id="fLogo" style="margin-bottom:18px">
+<label>شعار العميل | Client Logo</label>
+<div class="logoBox">
+<input type="file" id="clientLogoFile" accept="image/*" class="noPrint">
+<img id="clientLogoImg" alt="">
+<button type="button" class="ghost noPrint" id="clientLogoClear" style="display:none">إزالة الشعار</button>
 </div>
 </div>
 
@@ -531,21 +557,19 @@ SA5665000000101483617015
 <div class="viewSheet">
 <div class="viewHead">
 <h2>العملاء | Clients</h2>
+<button type="button" class="ghost" id="exportClientsBtn">⬇ تصدير العملاء Excel</button>
 </div>
 <form class="addClientForm" id="addClientForm">
-<div class="field">
-<label>اسم العميل | Name</label>
-<input type="text" id="newClientName" placeholder="اسم العميل" required>
-</div>
-<div class="field">
-<label>المدينة | City</label>
-<input type="text" id="newClientCity" placeholder="المدينة">
-</div>
-<div class="field">
-<label>جوال | Phone</label>
-<input type="text" id="newClientPhone" placeholder="رقم الجوال">
-</div>
-<button type="submit" class="primary">+ إضافة عميل</button>
+<input type="hidden" id="editClientId">
+<div class="field"><label>اسم الشخص | Person</label><input type="text" id="newClientPerson" placeholder="اختياري"></div>
+<div class="field"><label>اسم الشركة | Company</label><input type="text" id="newClientCompany" placeholder="اختياري"></div>
+<div class="field"><label>المدينة | City</label><input type="text" id="newClientCity" placeholder="اختياري"></div>
+<div class="field"><label>الرقم الضريبي | VAT No.</label><input type="text" id="newClientVat" placeholder="اختياري"></div>
+<div class="field"><label>السجل التجاري | C.R No.</label><input type="text" id="newClientCr" placeholder="اختياري"></div>
+<div class="field"><label>جوال | Phone</label><input type="text" id="newClientPhone" placeholder="اختياري"></div>
+<div class="field" style="grid-column:1/-1"><label>شعار العميل | Logo</label><div class="logoBox"><input type="file" id="newClientLogoFile" accept="image/*"><img id="newClientLogoImg" alt=""><button type="button" class="ghost" id="newClientLogoClear" style="display:none">إزالة</button></div></div>
+<button type="submit" class="primary" id="clientSubmitBtn">+ إضافة عميل</button>
+<button type="button" class="ghost" id="clientCancelBtn" style="display:none">إلغاء التعديل</button>
 </form>
 <div id="clientsList"></div>
 </div>
@@ -555,6 +579,7 @@ SA5665000000101483617015
 <div class="viewSheet">
 <div class="viewHead">
 <h2>العروض المحفوظة | Saved Quotes</h2>
+<button type="button" class="primary" id="newQuoteBtn">+ إضافة عرض سعر</button>
 </div>
 <div id="quotesList"></div>
 </div>
@@ -621,6 +646,45 @@ let currentEditingQuoteId = null;
 
 function escapeHtml(s){
 return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function cCompany(c){ return c.company !== undefined ? (c.company||'') : (c.name||''); }
+function cDisplay(c){ return cCompany(c) || c.person || c.name || 'عميل بدون اسم'; }
+function clientToFields(c){ return { person:c.person||'', company:cCompany(c), vat:c.vat||'', cr:c.cr||'', city:c.city||'', logo:c.logo||'' }; }
+function quoteToFields(q){ return { person:q.clientPerson||'', company:q.clientCompany !== undefined ? (q.clientCompany||'') : (q.clientName||''), vat:q.clientVat||'', cr:q.clientCr||'', city:q.clientCity||'', logo:q.clientLogo||'' }; }
+let quoteLogo = '', clientFormLogo = '';
+function setLogoPreview(imgId, clearId, data){
+const img = document.getElementById(imgId), clr = document.getElementById(clearId);
+if(data){ img.src = data; img.style.display = 'block'; if(clr) clr.style.display = ''; }
+else { img.removeAttribute('src'); img.style.display = 'none'; if(clr) clr.style.display = 'none'; }
+}
+function readLogo(file){
+return new Promise((resolve, reject) => {
+const fr = new FileReader();
+fr.onerror = reject;
+fr.onload = () => {
+const im = new Image();
+im.onerror = reject;
+im.onload = () => {
+const r = Math.min(1, 240 / im.width, 140 / im.height);
+const cv = document.createElement('canvas');
+cv.width = Math.max(1, Math.round(im.width * r)); cv.height = Math.max(1, Math.round(im.height * r));
+cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+resolve(file.type === 'image/jpeg' ? cv.toDataURL('image/jpeg', 0.85) : cv.toDataURL('image/png'));
+};
+im.src = fr.result;
+};
+fr.readAsDataURL(file);
+});
+}
+function fillClientFields(o){
+o = o || {};
+quoteLogo = o.logo || ''; setLogoPreview('clientLogoImg', 'clientLogoClear', quoteLogo);
+document.getElementById('clientLogoFile').value = '';
+document.getElementById('clientCompany').value = o.company || '';
+document.getElementById('clientPerson').value = o.person || '';
+document.getElementById('clientVat').value = o.vat || '';
+document.getElementById('clientCr').value = o.cr || '';
+document.getElementById('clientCity').value = o.city || '';
 }
 function currentSessionEmail(){ return localStorage.getItem(SESSION_KEY) || ''; }
 
@@ -711,20 +775,26 @@ function renderClientPicker(){
 const sel = document.getElementById('clientPicker');
 if(!sel) return;
 const current = sel.value;
-const sorted = pqData.clients.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+const sorted = pqData.clients.slice().sort((a,b) => cDisplay(a).localeCompare(cDisplay(b), 'ar'));
 sel.innerHTML = '<option value="">-- عميل جديد | New Client --</option>' +
-sorted.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)}${c.city ? (' — ' + escapeHtml(c.city)) : ''}</option>`).join('');
+sorted.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(cDisplay(c))}${c.person && cCompany(c) ? (' — ' + escapeHtml(c.person)) : ''}${c.city ? (' — ' + escapeHtml(c.city)) : ''}</option>`).join('');
 if(current) sel.value = current;
 }
-function findOrCreateClient(name, city){
-if(!name) return null;
-let c = pqData.clients.find(x => x.name.trim() === name.trim());
+function findOrCreateClient(f){
+if(!(f.person || f.company || f.vat || f.cr)) return '';
+let c = pqData.clients.find(x => (f.vat && x.vat === f.vat) || (!f.vat && f.company && cCompany(x).trim() === f.company) || (!f.vat && !f.company && f.person && !cCompany(x) && (x.person||'').trim() === f.person));
 if(c){
-if(city && !c.city) c.city = city;
+if(f.person && !c.person) c.person = f.person;
+if(f.company && !cCompany(c)) c.company = f.company;
+if(f.vat && !c.vat) c.vat = f.vat;
+if(f.cr && !c.cr) c.cr = f.cr;
+if(f.city && !c.city) c.city = f.city;
+if(f.logo && !c.logo) c.logo = f.logo;
+c.name = cDisplay(c);
 return c.id;
 }
 const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-c = { id, name, city: city || '', phone: '', createdAt: new Date().toISOString(), createdBy: currentSessionEmail() };
+c = { id, name: f.company || f.person, person: f.person, company: f.company, vat: f.vat, cr: f.cr, city: f.city || '', logo: f.logo || '', phone: '', createdAt: new Date().toISOString(), createdBy: currentSessionEmail() };
 pqData.clients.push(c);
 return id;
 }
@@ -735,19 +805,24 @@ if(!pqData.clients.length){
 el.innerHTML = '<div class="empty-state">لا يوجد عملاء محفوظين بعد.</div>';
 return;
 }
-const sorted = pqData.clients.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+const sorted = pqData.clients.slice().sort((a,b) => cDisplay(a).localeCompare(cDisplay(b), 'ar'));
 el.innerHTML = sorted.map(c => {
 const qCount = pqData.quotes.filter(q => q.clientId === c.id).length;
-const metaParts = [c.city || '—'];
+const metaParts = [];
+if(c.person && cCompany(c)) metaParts.push(c.person);
+if(c.city) metaParts.push(c.city);
 if(c.phone) metaParts.push(c.phone);
+if(c.vat) metaParts.push('ضريبي: ' + c.vat);
+if(c.cr) metaParts.push('س.ت: ' + c.cr);
 metaParts.push(qCount + ' عرض سعر');
 return `<div class="clientCard">
-<div class="clientInfo">
-<div class="clientName">${escapeHtml(c.name)}</div>
+<div class="clientInfo" style="display:flex;align-items:center">${c.logo ? `<img class="clientLogoThumb" src="${c.logo}" alt="">` : ''}<div>
+<div class="clientName">${escapeHtml(cDisplay(c))}</div>
 <div class="clientMeta">${escapeHtml(metaParts.join(' · '))}</div>
-</div>
+</div></div>
 <div class="clientActions">
 <button type="button" class="ghost" onclick="startQuoteForClient('${c.id}')">عرض سعر جديد</button>
+<button type="button" class="ghost" onclick="editClient('${c.id}')">تعديل</button>
 <button type="button" class="ghost" onclick="deleteClient('${c.id}')">حذف</button>
 </div>
 </div>`;
@@ -757,8 +832,7 @@ function startQuoteForClient(id){
 const c = pqData.clients.find(x => x.id === id);
 if(!c) return;
 document.getElementById('resetBtn').click();
-document.getElementById('clientName').value = c.name;
-document.getElementById('clientCity').value = c.city || '';
+fillClientFields(clientToFields(c));
 const picker = document.getElementById('clientPicker');
 if(picker) picker.value = c.id;
 switchView('quote');
@@ -774,21 +848,45 @@ pqData.clients = pqData.clients.filter(c => c.id !== id);
 const ok = await savePqData();
 if(ok){ renderClientsList(); renderClientPicker(); }
 }
+function resetClientForm(){
+document.getElementById('addClientForm').reset();
+clientFormLogo = ''; setLogoPreview('newClientLogoImg', 'newClientLogoClear', '');
+document.getElementById('editClientId').value = '';
+document.getElementById('clientSubmitBtn').textContent = '+ إضافة عميل';
+document.getElementById('clientCancelBtn').style.display = 'none';
+}
+function editClient(id){
+const c = pqData.clients.find(x => x.id === id);
+if(!c) return;
+document.getElementById('editClientId').value = id;
+document.getElementById('newClientPerson').value = c.person || '';
+document.getElementById('newClientCompany').value = cCompany(c);
+document.getElementById('newClientCity').value = c.city || '';
+document.getElementById('newClientVat').value = c.vat || '';
+document.getElementById('newClientCr').value = c.cr || '';
+document.getElementById('newClientPhone').value = c.phone || '';
+clientFormLogo = c.logo || ''; setLogoPreview('newClientLogoImg', 'newClientLogoClear', clientFormLogo);
+document.getElementById('clientSubmitBtn').textContent = 'حفظ التعديل';
+document.getElementById('clientCancelBtn').style.display = '';
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.getElementById('clientCancelBtn').addEventListener('click', resetClientForm);
 document.getElementById('addClientForm').addEventListener('submit', async function(e){
 e.preventDefault();
-const name = document.getElementById('newClientName').value.trim();
-const city = document.getElementById('newClientCity').value.trim();
-const phone = document.getElementById('newClientPhone').value.trim();
-if(!name) return;
-if(pqData.clients.some(c => c.name.trim() === name)){
-alert('يوجد عميل بنفس الاسم مسبقًا.');
-return;
-}
+const g = i => document.getElementById(i).value.trim();
+const d = { person:g('newClientPerson'), company:g('newClientCompany'), city:g('newClientCity'), vat:g('newClientVat'), cr:g('newClientCr'), phone:g('newClientPhone') };
+d.name = d.company || d.person; d.logo = clientFormLogo;
+const editId = document.getElementById('editClientId').value;
+if(editId){
+const c = pqData.clients.find(x => x.id === editId);
+if(c) Object.assign(c, d);
+} else {
 const id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-pqData.clients.push({ id, name, city, phone, createdAt: new Date().toISOString(), createdBy: currentSessionEmail() });
+pqData.clients.push(Object.assign({ id, createdAt: new Date().toISOString(), createdBy: currentSessionEmail() }, d));
+}
 const ok = await savePqData();
 if(ok){
-this.reset();
+resetClientForm();
 renderClientsList();
 renderClientPicker();
 }
@@ -796,8 +894,7 @@ renderClientPicker();
 document.getElementById('clientPicker').addEventListener('change', function(){
 const c = pqData.clients.find(x => x.id === this.value);
 if(c){
-document.getElementById('clientName').value = c.name;
-document.getElementById('clientCity').value = c.city || '';
+fillClientFields(clientToFields(c));
 }
 });
 
@@ -814,8 +911,13 @@ lineTotal: num(row.querySelector('.lineTotal').textContent)
 });
 });
 return {
-clientName: document.getElementById('clientName').value.trim(),
+clientPerson: document.getElementById('clientPerson').value.trim(),
+clientCompany: document.getElementById('clientCompany').value.trim(),
+clientVat: document.getElementById('clientVat').value.trim(),
+clientCr: document.getElementById('clientCr').value.trim(),
+clientName: (document.getElementById('clientCompany').value.trim() || document.getElementById('clientPerson').value.trim()),
 clientCity: document.getElementById('clientCity').value.trim(),
+clientLogo: quoteLogo,
 date: document.getElementById('quoteDate').value,
 items,
 discountPct: num(document.getElementById('discount').value),
@@ -828,11 +930,7 @@ fileName: document.getElementById('fileName').value.trim()
 }
 async function saveCurrentQuote(){
 const data = collectQuoteFromForm();
-if(!data.clientName){
-alert('اكتب اسم العميل قبل الحفظ.');
-return;
-}
-const clientId = findOrCreateClient(data.clientName, data.clientCity);
+const clientId = findOrCreateClient({ person:data.clientPerson, company:data.clientCompany, vat:data.clientVat, cr:data.clientCr, city:data.clientCity, logo:data.clientLogo });
 if(currentEditingQuoteId && pqData.quotes.some(q => q.id === currentEditingQuoteId)){
 const idx = pqData.quotes.findIndex(q => q.id === currentEditingQuoteId);
 pqData.quotes[idx] = Object.assign({}, pqData.quotes[idx], data, { clientId, updatedAt: new Date().toISOString() });
@@ -860,7 +958,7 @@ const sorted = pqData.quotes.slice().sort((a,b) => (b.createdAt || '').localeCom
 el.innerHTML = sorted.map(q => {
 return `<div class="quoteCard">
 <div class="quoteInfo">
-<div class="quoteClient">${escapeHtml(q.clientName || '—')}</div>
+<div class="quoteClient">${escapeHtml(q.clientName || q.clientPerson || 'بدون عميل')}</div>
 <div class="quoteMeta">${escapeHtml(q.date || '')} · ${escapeHtml(q.fileName || 'بدون اسم ملف')}</div>
 </div>
 <div class="quoteTotal">${escapeHtml(q.grandTotal || '0.00')} ر.س</div>
@@ -876,8 +974,7 @@ const q = pqData.quotes.find(x => x.id === id);
 if(!q) return;
 currentEditingQuoteId = id;
 document.getElementById('fileName').value = q.fileName || '';
-document.getElementById('clientName').value = q.clientName || '';
-document.getElementById('clientCity').value = q.clientCity || '';
+fillClientFields(quoteToFields(q));
 if(q.date) document.getElementById('quoteDate').value = q.date;
 document.getElementById('discount').value = String(q.discountPct || 0);
 const picker = document.getElementById('clientPicker');
@@ -1006,6 +1103,10 @@ const fileName = document.getElementById('fileName').value.trim();
 document.title = fileName ? fileName : defaultTitle;
 setTimeout(() => { window.print(); }, 80);
 });
+const PH = ['clientCompany:fCompany','clientPerson:fPerson','clientVat:fVat','clientCr:fCr','clientCity:fCity'];
+window.addEventListener('beforeprint', () => { PH.forEach(p => { const [i,f] = p.split(':'); document.getElementById(f).classList.toggle('printHide', !document.getElementById(i).value.trim()); }); });
+window.addEventListener('afterprint', () => { PH.forEach(p => document.getElementById(p.split(':')[1]).classList.remove('printHide')); });
+document.getElementById('newQuoteBtn').addEventListener('click', () => { document.getElementById('resetBtn').click(); switchView('quote'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 window.addEventListener('afterprint', () => {
 document.title = defaultTitle;
 });
@@ -1013,8 +1114,7 @@ document.title = defaultTitle;
 document.getElementById('resetBtn').addEventListener('click', () => {
 currentEditingQuoteId = null;
 document.getElementById('fileName').value = '';
-document.getElementById('clientName').value = '';
-document.getElementById('clientCity').value = '';
+fillClientFields({});
 document.getElementById('discount').value = '0';
 document.getElementById('quoteDate').valueAsDate = new Date();
 const picker = document.getElementById('clientPicker');
@@ -1026,6 +1126,45 @@ calculate();
 
 addRow();
 calculate();
+async function pickLogo(inputId, imgId, clearId, setter){
+const f = document.getElementById(inputId).files[0];
+if(!f) return;
+try{ const d = await readLogo(f); setter(d); setLogoPreview(imgId, clearId, d); }
+catch(e){ alert('تعذر قراءة الصورة.'); }
+}
+document.getElementById('clientLogoFile').addEventListener('change', () => pickLogo('clientLogoFile', 'clientLogoImg', 'clientLogoClear', d => { quoteLogo = d; }));
+document.getElementById('clientLogoClear').addEventListener('click', () => { quoteLogo = ''; document.getElementById('clientLogoFile').value = ''; setLogoPreview('clientLogoImg', 'clientLogoClear', ''); });
+document.getElementById('newClientLogoFile').addEventListener('change', () => pickLogo('newClientLogoFile', 'newClientLogoImg', 'newClientLogoClear', d => { clientFormLogo = d; }));
+document.getElementById('newClientLogoClear').addEventListener('click', () => { clientFormLogo = ''; document.getElementById('newClientLogoFile').value = ''; setLogoPreview('newClientLogoImg', 'newClientLogoClear', ''); });
+const prePrintLogo = () => document.getElementById('fLogo').classList.toggle('printHide', !quoteLogo);
+window.addEventListener('beforeprint', prePrintLogo);
+window.addEventListener('afterprint', () => document.getElementById('fLogo').classList.remove('printHide'));
+document.getElementById('exportClientsBtn').addEventListener('click', () => {
+if(!pqData.clients.length){ alert('لا يوجد عملاء لتصديرهم.'); return; }
+const rows = pqData.clients.slice().sort((a,b) => cDisplay(a).localeCompare(cDisplay(b), 'ar')).map(c => {
+const qs = pqData.quotes.filter(q => q.clientId === c.id);
+return {
+'اسم الشركة': cCompany(c), 'اسم الشخص': c.person || '', 'المدينة': c.city || '', 'الرقم الضريبي': c.vat || '', 'السجل التجاري': c.cr || '', 'الجوال': c.phone || '',
+'عدد العروض': qs.length, 'إجمالي العروض': qs.reduce((t, q) => t + num(q.grandTotal), 0), 'تاريخ الإضافة': (c.createdAt || '').slice(0, 10)
+};
+});
+const stamp = new Date().toISOString().slice(0, 10);
+if(typeof XLSX !== 'undefined'){
+const ws = XLSX.utils.json_to_sheet(rows);
+ws['!cols'] = Object.keys(rows[0]).map(() => ({ wch: 20 }));
+const wb = XLSX.utils.book_new();
+wb.Workbook = { Views: [{ RTL: true }] };
+XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+XLSX.writeFile(wb, 'العملاء-' + stamp + '.xlsx');
+} else {
+const keys = Object.keys(rows[0]);
+const csv = '\uFEFF' + [keys].concat(rows.map(r => keys.map(k => r[k]))).map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+const a = document.createElement('a');
+a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+a.download = 'العملاء-' + stamp + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+});
+Object.assign(window, { startQuoteForClient, deleteClient, editClient, loadQuoteIntoForm, deleteQuote });
 })();
 </script>
 </body>
